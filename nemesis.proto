@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package Nemesis;
+
+enum Lang {
+    CC = 0;
+    CXX = 1;
+    RAM = 2;
+}
+
+enum StatusCode {
+    OK = 0;
+    TLE = 1;
+    MLE = 2;
+    ILL = 3;
+    SEG = 4;
+    FPE = 5;
+    RE = 6;
+    OE = 7;
+    SYS = 8;
+    FSZ = 9;
+}
+
+message Submit { 
+    uint64 id = 1;
+    Task task = 2;
+    uint64 user_id = 3;
+    Lang lang = 4;
+    bytes code = 5;
+    uint64 subsection_id = 6;
+    bool rejudge = 7;
+}
+
+message LogicSubmit {
+    uint64 id = 1;
+    uint64 user_id = 2;
+    uint64 task_id = 3;
+    Lang lang = 4;
+    bytes code = 5;
+    uint64 subsection_id = 6;
+}
+
+message Status {
+    uint64 id = 1;
+    uint64 task_id = 2;
+    uint64 user_id = 3;
+    uint64 subsection_id = 4;
+    Lang lang = 5;
+    uint32 number_of_groups = 6;
+    uint32 points = 7;
+    bool acm = 8;
+    bool compiled = 9;
+    bool rejudge = 10;
+    string compile_log = 11;
+    StatusCode status = 12;
+
+    message Group {
+        uint32 id = 1;
+        uint32 number_of_tests = 2;
+        bool verdict = 3;
+        StatusCode status = 4;
+
+        message Test {
+            uint32 id = 1;
+            StatusCode status = 2;
+            bool verdict = 3;
+            int64 time = 4;
+            int64 memory = 5;
+        }
+
+        repeated Test tests = 5;
+    }
+
+    repeated Group groups = 13;
+}
+
+message Task {
+    uint64 task_id = 1;
+    uint32 number_of_groups = 2;
+
+    message Group {
+        uint32 id = 1;
+        uint32 number_of_tests = 2;
+
+        message Test {
+            uint32 id = 1;
+            int64 time_limit = 2;
+            int64 memory_limit = 3;
+            bytes input = 4;
+            bytes output = 5;
+        }
+        
+        repeated Test tests = 3;
+    }
+
+    repeated Group groups = 3;
+    bool gen = 4;
+    bytes checker = 7;
+    bytes solution = 8;
+}
+
+message CustomInvocation {
+    uint64 id = 1;
+    uint64 user_id = 2;
+    Lang lang = 3;
+    Task.Group.Test test = 4;
+    bytes source = 5;
+}
+
+message CustomInvocationStatus {
+    uint64 id = 1;
+    uint64 user_id = 2;
+    int64 time = 3;
+    int64 memory = 4;
+    bool compiled = 5;
+    string compile_log = 6;
+    StatusCode status = 7;
+    bytes out = 8;
+}
+
+message Job {
+    bool custom = 1;
+    CustomInvocation custom_job = 2;
+    Submit submit = 3;
+}
+
+message LogicJob {
+    bool custom = 1;
+    CustomInvocation custom_job = 2;
+    LogicSubmit submit = 3;
+}
+
+message JobReturn {
+    bool custom = 1;
+    CustomInvocationStatus custom_status = 2;
+    Status status = 3;
+    bool system_error = 4;
+}
+
+message Heartbeat {
+    uint64 id = 1;
+    string name = 2;
+    string port = 3;
+    string addr = 4;
+}
